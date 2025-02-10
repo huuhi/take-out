@@ -1,20 +1,27 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.PageDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.query.PageQuery;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.time.LocalDateTime;
+
 @Service
-public class EmployeeServiceImpl implements EmployeeService {
+public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> implements EmployeeService {
 
     @Autowired
     private EmployeeMapper employeeMapper;
@@ -39,7 +46,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         //密码比对
-        // TODO 后期需要进行md5加密，然后再进行比对
+        // 加密
+        password=DigestUtils.md5DigestAsHex(password.getBytes());
         if (!password.equals(employee.getPassword())) {
             //密码错误
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
@@ -52,6 +60,30 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //3、返回实体对象
         return employee;
+    }
+
+    @Override
+    public Integer updatePassword(Integer empId, String newPassword, String oldPassword) {
+        boolean update = Db.lambdaUpdate(Employee.class)
+                .eq(Employee::getId, empId)
+                .eq(Employee::getPassword, DigestUtils.md5DigestAsHex(oldPassword.getBytes()))
+                .set(Employee::getPassword, DigestUtils.md5DigestAsHex(newPassword.getBytes()))
+                .set(Employee::getUpdateTime, LocalDateTime.now())
+                .update();
+        if (update) {
+            return 1;
+        }
+        return 0;
+    }
+
+    @Override
+    public PageDTO<Employee> queryEmpByPage(PageQuery pageQuery) {
+        String name = pageQuery.getName();
+        Page<Employee> page = pageQuery.toMpPageDefaultSortByUpdateTime();
+        Page<Employee> page1 = lambdaQuery()
+                .like(name != null, Employee::getName,name)
+                .page(page);
+        return PageDTO.of(page1,Employee.class);
     }
 
 }
