@@ -35,12 +35,12 @@ public class JwtUtil {
     }
 
 //    根据token获取id
-    public static Long getIdFromToken(String token) {
+    public static Long getIdFromToken(String token,String key) {
         Claims claims = Jwts.parser()
                 .setSigningKey(SECRET_KEY)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        return Long.valueOf((Integer)claims.get(JwtClaimsConstant.EMP_ID));
+        return Long.valueOf((Integer)claims.get(key));
     }
 }

@@ -1,5 +1,6 @@
 package com.sky.controller.admin;
 
+import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.PageDTO;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
@@ -31,7 +32,7 @@ public class SetMealController {
     @PostMapping
     public Result addSetmeal(@RequestBody SetmealDTO setmealDTO,
                              @RequestHeader("token")String token){
-        Long id = JwtUtil.getIdFromToken(token);
+        Long id = JwtUtil.getIdFromToken(token, JwtClaimsConstant.EMP_ID);
         boolean isSuccess = setmealService.addSetmeal(setmealDTO,id);
         return isSuccess? Result.success() : Result.error("添加失败");
     }
@@ -45,7 +46,7 @@ public class SetMealController {
     public Result updateStatus(@PathVariable("status") Integer status,
                                @RequestParam("id") Long id,
                                @RequestHeader("token")String token){
-        Long userId = JwtUtil.getIdFromToken(token);
+        Long userId = JwtUtil.getIdFromToken(token,JwtClaimsConstant.EMP_ID);
         boolean isSuccess = setmealService.updateStatus(status,id,userId);
         return isSuccess? Result.success() : Result.error("修改失败");
     }
@@ -65,7 +66,7 @@ public class SetMealController {
     @PutMapping
     public Result updateSetmeal(@RequestBody SetmealDTO setmealDTO,
                                @RequestHeader("token")String token){
-        Long userId = JwtUtil.getIdFromToken(token);
+        Long userId = JwtUtil.getIdFromToken(token,JwtClaimsConstant.EMP_ID);
         boolean isSuccess = setmealService.updateSetmeal(setmealDTO,userId);
         return isSuccess ? Result.success() : Result.error("修改失败");
     }

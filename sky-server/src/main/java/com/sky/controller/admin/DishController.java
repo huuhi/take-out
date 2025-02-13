@@ -1,6 +1,7 @@
 package com.sky.controller.admin;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.dto.PageDTO;
@@ -31,7 +32,7 @@ public class DishController {
 //    添加菜品
     @PostMapping
     public Result addDish(@RequestBody DishDTO dishDTO, @RequestHeader("token")String token){
-        Long id = JwtUtil.getIdFromToken(token);
+        Long id = JwtUtil.getIdFromToken(token, JwtClaimsConstant.EMP_ID);
         boolean isSuccess = dishService.addDish(dishDTO,id);
         return isSuccess? Result.success() : Result.error("添加失败");
     }
@@ -63,7 +64,7 @@ public class DishController {
 //    修改菜品
     @PutMapping
     public Result updateDish(@RequestBody DishDTO dishDTO, @RequestHeader("token")String token){
-        Long id = JwtUtil.getIdFromToken(token);
+        Long id = JwtUtil.getIdFromToken(token,JwtClaimsConstant.EMP_ID);
         boolean isSuccess= dishService.updateDish(dishDTO,id);
         return isSuccess? Result.success() : Result.error("修改失败");
     }
@@ -71,7 +72,7 @@ public class DishController {
     @PostMapping("/status/{status}")
     public Result updateStatus(@PathVariable Integer status, @RequestParam Long id,
                                @RequestHeader("token")String token){
-        Long id1 = JwtUtil.getIdFromToken(token);
+        Long id1 = JwtUtil.getIdFromToken(token, JwtClaimsConstant.EMP_ID);
         log.info("修改菜品状态,id:{},status:{},userId:{}",id,status,id1);
         boolean isSuccess = dishService.updateDishStatus(status,id,id1);
         return isSuccess? Result.success() : Result.error("修改失败");

@@ -16,11 +16,11 @@ import org.springframework.web.servlet.HandlerInterceptor;
 /**
  * jwt令牌校验的拦截器
  */
-//@Component
+@Component
 @Slf4j
 public class JwtTokenAdminInterceptor implements HandlerInterceptor {
 
-//    @Autowired
+    @Autowired
     private JwtProperties jwtProperties;
 
     /**

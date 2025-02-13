@@ -11,6 +11,11 @@ spring:
         enabled: true
         max-file-size: 2MB
         max-request-size: 2MB
+  data:
+    redis:
+     port: 6379
+     host: localhost
+     database: 0
 logging:
   level:
     com:
@@ -20,6 +25,7 @@ logging:
         controller: info
   pattern:
     dateformat: HH:mm:ss
+
 
 mybatis-plus:
   type-aliases-package: zhijianhu.demo01.pojo
@@ -39,5 +45,9 @@ sky:
     endpoint: https://oss-cn-guangzhou.aliyuncs.com
     bucket-name: huzhijian-springboot-csse
     region: cn-guangzhou
+  wechat:
+    appid: wx67da6849ac3e12c0
+    secret: c8639b7842bc5be06858a8cfd4b5558a
+
 
 

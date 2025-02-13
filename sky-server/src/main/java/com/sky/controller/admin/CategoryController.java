@@ -1,6 +1,7 @@
 package com.sky.controller.admin;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.dto.PageDTO;
@@ -32,7 +33,7 @@ public class CategoryController {
     public Result addCategory(@RequestBody CategoryDTO categoryDTO,
                               @RequestHeader("token") String token) {
         Category category = BeanUtil.copyProperties(categoryDTO, Category.class);
-        Long id = JwtUtil.getIdFromToken(token);
+        Long id = JwtUtil.getIdFromToken(token, JwtClaimsConstant.EMP_ID);
         boolean save = categoryService.saveCategory(category,id);
         if (save) {
             return Result.success();
@@ -52,14 +53,14 @@ public class CategoryController {
     public Result updateStatus(@PathVariable("status") Integer status,
                                @RequestParam("id") Long id,
                                @RequestHeader("token") String token){
-        boolean update = categoryService.updateStatus(status,id, JwtUtil.getIdFromToken(token));
+        boolean update = categoryService.updateStatus(status,id, JwtUtil.getIdFromToken(token, JwtClaimsConstant.EMP_ID));
         return update?Result.success():Result.error("更新失败");
     }
 //    修改分类
     @PutMapping
     public Result updateCategory(@RequestBody CategoryDTO categoryDTO,
                                  @RequestHeader("token") String token){
-        boolean update = categoryService.updateCategory(categoryDTO, JwtUtil.getIdFromToken(token));
+        boolean update = categoryService.updateCategory(categoryDTO, JwtUtil.getIdFromToken(token, JwtClaimsConstant.EMP_ID));
         return update?Result.success():Result.error("更新失败");
     }
 //    根据id删除分类
@@ -71,6 +72,12 @@ public class CategoryController {
 //    根据类型查询分类
     @GetMapping("/list")
     public Result<List<Category>> queryCategoryByTypes(@RequestParam("type") Integer type){
+        List<Category> categories = categoryService.queryCategoryByTypes(type);
+        return Result.success(categories);
+    }
+
+    @GetMapping("/user/category/list")
+    public Result<List<Category>> queryCategoryByType(@RequestParam("type") Integer type){
         List<Category> categories = categoryService.queryCategoryByTypes(type);
         return Result.success(categories);
     }

@@ -7,6 +7,7 @@ import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.result.Result;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 
 import java.util.List;
@@ -29,4 +30,6 @@ public interface SetmealService extends IService<Setmeal> {
     SetmealVO getSetmealById(Long id);
 
     boolean updateSetmeal(SetmealDTO setmealDTO, Long userId);
+
+    List<DishItemVO> getDishById(Long id);
 }

@@ -106,7 +106,7 @@ public class EmployeeController {
         employee.setStatus(status);
 //        Claims claims = JwtUtil.parseJWT(token);
 //        Long o = Long.valueOf((Integer) claims.get(JwtClaimsConstant.EMP_ID));
-        employee.setUpdateUser(JwtUtil.getIdFromToken(token));
+        employee.setUpdateUser(JwtUtil.getIdFromToken(token,JwtClaimsConstant.EMP_ID));
         employeeService.updateById(employee);
         return Result.success();
     }
@@ -132,7 +132,7 @@ public class EmployeeController {
 //        Claims claims = JwtUtil.parseJWT(token);
 //        Long o = Long.valueOf((Integer) claims.get(JwtClaimsConstant.EMP_ID));
 //        employee.setUpdateUser(o);
-        employee.setUpdateUser(JwtUtil.getIdFromToken(token));
+        employee.setUpdateUser(JwtUtil.getIdFromToken(token,JwtClaimsConstant.EMP_ID));
         employeeService.updateById(employee);
         return Result.success();
     }

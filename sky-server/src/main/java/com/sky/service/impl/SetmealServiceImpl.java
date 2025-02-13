@@ -7,20 +7,24 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sky.dto.PageDTO;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
+import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.query.PageQuery;
 import com.sky.result.Result;
 import com.sky.service.CategoryService;
+import com.sky.service.DishService;
 import com.sky.service.SetmealService;
 import com.sky.mapper.SetmealMapper;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -38,6 +42,9 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
     private CategoryService categoryService;
     @Autowired
     private SetmealDishMapper setmealDishMapper;
+
+    @Autowired
+    private DishService dishService;
     @Override
     public boolean addSetmeal(SetmealDTO setmealDTO,Long userId) {
         List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
@@ -109,6 +116,9 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
         Setmeal setmeal = getById(id);
         List<SetmealDish> setmealDish = extracted(id);
         SetmealVO setmealVO = BeanUtil.copyProperties(setmeal, SetmealVO.class);
+        if(setmealVO==null){
+            return null;
+        }
         setmealVO.setSetmealDishes(setmealDish);
         return setmealVO;
     }
@@ -119,17 +129,17 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
         List<SetmealDish> extracted = extracted(setmealDTO.getId());
         if(extracted.size()>setmealDishes.size()){
 //            说明需要删除
-        List<Long> idsToDelete = extracted.stream()
-            .filter(dish -> dish.getId() != null)  // 过滤掉 id 为 null 的元素
-            .map(SetmealDish::getId)
-            .filter(id -> setmealDishes.stream()
-                    .filter(dish -> dish.getId() != null)  // 过滤掉 id 为 null 的元素
-                .noneMatch(dish -> Objects.equals(dish.getId(), id)))  // 使用 Objects.equals 安全比较
-            .collect(Collectors.toList());
-            if(!idsToDelete.isEmpty()){
-                int i = setmealDishMapper.deleteBatchIds(idsToDelete);
-                log.info("删除套餐菜品关联数据：{}条", i);
-            }
+            List<Long> idsToDelete = extracted.stream()
+                .filter(dish -> dish.getId() != null)  // 过滤掉 id 为 null 的元素
+                .map(SetmealDish::getId)
+                .filter(id -> setmealDishes.stream()
+                        .filter(dish -> dish.getId() != null)  // 过滤掉 id 为 null 的元素
+                    .noneMatch(dish -> Objects.equals(dish.getId(), id)))  // 使用 Objects.equals 安全比较
+                .collect(Collectors.toList());
+                if(!idsToDelete.isEmpty()){
+                    int i = setmealDishMapper.deleteBatchIds(idsToDelete);
+                    log.info("删除套餐菜品关联数据：{}条", i);
+                }
         }
         setmealDishes.forEach(setmealDish -> {
             setmealDish.setSetmealId(setmealDTO.getId());
@@ -143,6 +153,23 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
         setmeal.setUpdateUser(userId);
         setmeal.setUpdateTime(LocalDateTime.now());
         return updateById(setmeal);
+    }
+
+    @Override
+    public List<DishItemVO> getDishById(Long id) {
+        List<DishItemVO> dishItemVOS = new ArrayList<>();
+        List<SetmealDish> extracted = extracted(id);
+        extracted.forEach(setmealDish -> {
+            Long dishId = setmealDish.getDishId();
+            Dish dish = dishService.getById(dishId);
+            DishItemVO dishItemVO = new DishItemVO();
+            dishItemVO.setCopies(setmealDish.getCopies());
+            dishItemVO.setName(dish.getName());
+            dishItemVO.setImage(dish.getImage());
+            dishItemVO.setDescription(dish.getDescription());
+            dishItemVOS.add(dishItemVO);
+        });
+        return dishItemVOS;
     }
 
     private List<SetmealDish> extracted(Long setmealDTO) {
